@@ -6,8 +6,11 @@
 #include <GL/glut.h>
 
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 #include <tgeVector3T.hpp>
+#include <tgeTimer.h>
 
 tgeGLViewer3D::tgeGLViewer3D(QWidget *parent) :
 	QGLWidget(parent),
@@ -41,9 +44,9 @@ void tgeGLViewer3D::paintGL()
 
 	drawBackground();
 
-	glMatrixMode( GL_PROJECTION );
+	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective( 60.0, (float) 1024 / (float) 768, 0.1, 100.0 );
+	gluPerspective( 60.0, (float) width() / (float) height(), 0.1, 100.0 );
 
 	glMatrixMode( GL_MODELVIEW );
 	glLoadIdentity();
@@ -55,6 +58,8 @@ void tgeGLViewer3D::paintGL()
 
 	drawGrid();
 	drawAxis();
+	drawCornerAxis();
+	drawFPS();
 
 	swapBuffers();
 }
@@ -90,6 +95,13 @@ void tgeGLViewer3D::mouseMoveEvent( QMouseEvent* aEvent )
 	m_lastPos = aEvent->pos();
 }
 
+void tgeGLViewer3D::wheelEvent(QWheelEvent *event)
+{
+	const int delta = event->delta();
+	m_translation[2] += delta/fabs(delta);
+	updateGL();
+}
+
 void tgeGLViewer3D::drawBackground()
 {
 	glMatrixMode( GL_PROJECTION );
@@ -108,26 +120,42 @@ void tgeGLViewer3D::drawBackground()
 	glEnd();
 }
 
+void tgeGLViewer3D::drawCornerAxis()
+{
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glOrtho(-1, 1, -1, 1, -1, 1);
+	glViewport(0, 0, 50, 50);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	glRotatef( m_rotation[0], 1.0, 0.0, 0.0 );
+	glRotatef( m_rotation[1], 0.0, 1.0, 0.0 );
+	glRotatef( m_rotation[2], 0.0, 0.0, 1.0 );
+
+	drawAxis();
+
+	glViewport(0, 0, width(), height());
+}
+
 void tgeGLViewer3D::drawAxis()
 {
 	glLineWidth( 2.0 );
 
+	glBegin( GL_LINES );
+
 	glColor3f( 1.f, 0.f, 0.f );
-	glBegin( GL_LINES );
-		glVertex3f( 0, 0, 0 );
-		glVertex3f( 1, 0, 0 );
-	glEnd();
-
+	glVertex3f( 0, 0, 0 );
+	glVertex3f( 1, 0, 0 );
 	glColor3f( 0.f, 1.f, 0.f );
-	glBegin( GL_LINES );
-		glVertex3f( 0, 0, 0 );
-		glVertex3f( 0, 1, 0 );
-	glEnd();
-
+	glVertex3f( 0, 0, 0 );
+	glVertex3f( 0, 1, 0 );
 	glColor3f( 0.f, 0.f, 1.f );
-	glBegin( GL_LINES );
-		glVertex3f( 0, 0, 0 );
-		glVertex3f( 0, 0, 1 );
+	glVertex3f( 0, 0, 0 );
+	glVertex3f( 0, 0, 1 );
+
 	glEnd();
 }
 
@@ -171,4 +199,65 @@ void tgeGLViewer3D::drawGrid()
 		glVertex3f( 0, 0, -10 );
 		glVertex3f( 0, 0, 10 );
 	glEnd();
+}
+
+void tgeGLViewer3D::drawString(const std::string& string,
+							   int x, int y)
+{
+	glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
+	glDisable(GL_LIGHTING);
+
+	glRasterPos2i(x, y);
+
+	const char* str = string.c_str();
+	while(*str)
+	{
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *str);
+		++str;
+	}
+
+	glEnable(GL_LIGHTING);
+	glPopAttrib();
+}
+
+void tgeGLViewer3D::drawFPS()
+{
+	static tgeTimer timer;
+	static int count = 0;
+	static std::stringstream ss;
+	double elapsedTime;
+
+	glPushMatrix();
+	glLoadIdentity();
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	gluOrtho2D(0, width(), 0, height());
+
+	elapsedTime = timer.getElapsedTime();
+
+	if(elapsedTime < 1.0)
+	{
+		++count;
+	}
+	else
+	{
+		ss.str("");
+		ss << std::fixed << std::setprecision(1);
+		ss << (count / elapsedTime) << " FPS" << std::ends;
+		ss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
+
+		count = 0;
+		timer.start();
+	}
+
+	static const float color[4] = {1, 1, 1, 1};
+	glColor4fv( color );
+	drawString( ss.str(), width()-80, height()-20);
+
+	glPopMatrix();
+
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
 }

@@ -2,6 +2,9 @@
 #define TGEGLVIEWER3D_H
 
 #include <QtOpenGL/QGLWidget>
+
+#include <string>
+
 #include <tgeVector3T.h>
 
 class tgeGLViewer3D : public QGLWidget
@@ -17,14 +20,18 @@ protected:
 	virtual void initializeGL();
 	virtual void resizeGL(int, int);
 	virtual void paintGL();
-	virtual void mousePressEvent( QMouseEvent* );
-	virtual void mouseMoveEvent( QMouseEvent* );
+	virtual void mousePressEvent(QMouseEvent*);
+	virtual void mouseMoveEvent(QMouseEvent*);
+	virtual void wheelEvent(QWheelEvent*);
 
 private :
 
 	void drawBackground();
+	void drawCornerAxis();
 	void drawAxis();
 	void drawGrid();
+	void drawString(const std::string&, int, int);
+	void drawFPS();
 
 	tgeVector3f	m_translation;
 	tgeVector3f	m_rotation;

@@ -17,4 +17,5 @@ SOURCES += main.cpp\
 
 HEADERS  += tgeGLViewer3D.h \
     tgeVector3T.h \
-    tgeVector3T.hpp
+    tgeVector3T.hpp \
+    tgeTimer.h
