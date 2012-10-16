@@ -12,10 +12,11 @@ TEMPLATE = app
 LIBS += -lglut -lGL
 
 SOURCES += main.cpp\
-        tgeGLViewer3D.cpp \
-    tgeVector3T.cpp
+			tgeGLViewer3D.cpp \
+			linearAlgebra/tgeVector3T.cpp
 
 HEADERS  += tgeGLViewer3D.h \
-    tgeVector3T.h \
-    tgeVector3T.hpp \
-    tgeTimer.h
+			linearAlgebra/tgeVector3T.h \
+			linearAlgebra/tgeVector3T.hpp \
+			utils/tgeUtils.h \
+			utils/tgeTimer.h

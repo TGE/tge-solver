@@ -9,8 +9,8 @@
 #include <sstream>
 #include <iomanip>
 
-#include <tgeVector3T.hpp>
-#include <tgeTimer.h>
+#include "linearAlgebra/tgeVector3T.hpp"
+#include "utils/tgeTimer.h"
 
 tgeGLViewer3D::tgeGLViewer3D(QWidget *parent) :
 	QGLWidget(parent),

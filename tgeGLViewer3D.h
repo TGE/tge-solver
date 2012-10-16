@@ -5,7 +5,7 @@
 
 #include <string>
 
-#include <tgeVector3T.h>
+#include "linearAlgebra/tgeVector3T.h"
 
 class tgeGLViewer3D : public QGLWidget
 {
@@ -13,7 +13,7 @@ class tgeGLViewer3D : public QGLWidget
 
 public:
     tgeGLViewer3D(QWidget *parent = 0);
-    ~tgeGLViewer3D();
+	virtual ~tgeGLViewer3D();
 
 protected:
 
