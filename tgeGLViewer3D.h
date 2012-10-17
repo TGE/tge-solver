@@ -7,6 +7,9 @@
 
 #include "linearAlgebra/tgeVector3T.h"
 
+class tgeParticle;
+class tgeParticleSystem;
+
 class tgeGLViewer3D : public QGLWidget
 {
     Q_OBJECT
@@ -23,6 +26,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseMoveEvent(QMouseEvent*);
 	virtual void wheelEvent(QWheelEvent*);
+	virtual void keyPressEvent(QKeyEvent*);
 
 private :
 
@@ -33,9 +37,16 @@ private :
 	void drawString(const std::string&, int, int);
 	void drawFPS();
 
+	void drawParticles() const;
+	void drawParticle(const tgeParticle*) const;
+
 	tgeVector3f	m_translation;
 	tgeVector3f	m_rotation;
 	QPoint		m_lastPos;
+
+	size_t		m_fps;
+
+	tgeParticleSystem* m_partSystem;
 };
 
 #endif // TGEGLVIEWER3D_H

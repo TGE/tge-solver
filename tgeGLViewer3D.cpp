@@ -8,18 +8,26 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
 
+#include "dynamics/tgeParticle.h"
+#include "dynamics/tgeParticleSystem.h"
 #include "linearAlgebra/tgeVector3T.hpp"
 #include "utils/tgeTimer.h"
 
 tgeGLViewer3D::tgeGLViewer3D(QWidget *parent) :
 	QGLWidget(parent),
 	m_translation(0.f, -3.f, -25.f),
-	m_rotation(10.f, -25.f, 0.f)
+	m_rotation(10.f, -25.f, 0.f),
+	m_fps(24),
+	m_partSystem(new tgeParticleSystem())
 {}
 
 tgeGLViewer3D::~tgeGLViewer3D()
-{}
+{
+	delete m_partSystem;
+	m_partSystem = 0x0;
+}
 
 void tgeGLViewer3D::initializeGL()
 {
@@ -58,8 +66,12 @@ void tgeGLViewer3D::paintGL()
 
 	drawGrid();
 	drawAxis();
+
+	drawParticles();
+
 	drawCornerAxis();
 	drawFPS();
+
 
 	swapBuffers();
 }
@@ -100,6 +112,22 @@ void tgeGLViewer3D::wheelEvent(QWheelEvent *event)
 	const int delta = event->delta();
 	m_translation[2] += delta/fabs(delta);
 	updateGL();
+}
+
+void tgeGLViewer3D::keyPressEvent(QKeyEvent* event)
+{
+	switch (event->key())
+	{
+		case Qt::Key_Left:
+			break;
+		case Qt::Key_Right:
+			m_partSystem->stepTo(1.f/(float)m_fps);
+			updateGL();
+			break;
+		default:
+			QGLWidget::keyPressEvent(event);
+			break;
+	}
 }
 
 void tgeGLViewer3D::drawBackground()
@@ -260,4 +288,30 @@ void tgeGLViewer3D::drawFPS()
 
 	glMatrixMode(GL_MODELVIEW);
 	glPopMatrix();
+}
+
+void tgeGLViewer3D::drawParticles() const
+{
+	glColor3f(1.f, 1.f, 1.f);
+	glPointSize(3);
+	glLineWidth(1);
+
+	const std::vector<tgeParticle*>& particles = m_partSystem->getParticles();
+	std::for_each (	particles.begin(), particles.end(), std::bind1st(
+					std::mem_fun(&tgeGLViewer3D::drawParticle),this));
+}
+
+void tgeGLViewer3D::drawParticle(const tgeParticle* particle) const
+{
+	const tgeVector3f& pos = particle->getX();
+	const tgeVector3f& vel = particle->getV();
+
+	glBegin(GL_POINTS);
+		glVertex3f(pos[0], pos[1], pos[2]);
+	glEnd();
+
+	glBegin(GL_LINES);
+		glVertex3f(pos[0], pos[1], pos[2]);
+		glVertex3f(pos[0]+vel[0], pos[1]+vel[1], pos[2]+vel[2]);
+	glEnd();
 }

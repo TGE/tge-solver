@@ -2,15 +2,9 @@
 #define TGE_UTILS_H
 
 #include <vector>
+#include <cstdlib>
 
-// fix Microsoft VC++ oddities
-#ifdef min // MS defines min as a macro, making it impossible to use the identifier for functions etc.
-#undef min
-#endif
-#ifdef max // MS defines max as a macro, making it impossible to use the identifier for functions etc.
-#undef max
-#endif
-#ifndef M_PI // MS fails to define M_PI in the standard math header file
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
@@ -21,22 +15,16 @@ inline T sqr( const T& aX )
 }
 
 template<typename T>
-inline T min( const T& a1, const T& a2, const T& a3 )
-{
-	return ( a1 < a2 ) ? min( a1, a3 ) : min( a2, a3 );
-}
-
-template<typename T>
-inline T max( const T& a1, const T& a2, const T& a3 )
-{
-	return ( a1 > a2 ) ? max( a1, a3 ) : max( a2, a3 );
-}
-
-template<typename T>
 inline T clamp( T aValue, T aLower, T aUpper )
 {
 	return	( aValue < aLower ) ? aLower :
 			( aValue > aUpper ) ? aUpper : aValue;
+}
+
+template<typename T>
+inline T rand( const T min, const T max)
+{
+	return ( rand()/(T)RAND_MAX ) * (max-min) + min;
 }
 
 template<typename T>
